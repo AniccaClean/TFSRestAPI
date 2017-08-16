@@ -8,7 +8,7 @@ At the present time, this implementation only supports on-premise TFS, but can e
 
 This project is constantly evolving and will begin a phase of implementing the [PowerShell Best Practices Guidelines](https://github.com/PoshCode/PowershellPracticeAndStyle) before any major, additional functionality is added.
 
-# Credits
+## Credits
 [Adam Newhard](https://www.adamnewhard.com) - Present author and maintainer.
 
 [Majkinetor](https://github.com/majkinetor) whose general code structure I took as I learn how to better manage PowerShell modules.
