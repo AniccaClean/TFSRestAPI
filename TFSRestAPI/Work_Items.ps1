@@ -30,38 +30,42 @@
 #############################################################
 function Get-WorkItems {
     Param (
-        [Parameter(Mandatory=$true)][string]$instance,
-        [string]$ids,
-        [string]$fields,
-        [datetime]$asOf,
-        [string]$expand = "none", # all, relations, none
+        [Parameter(Mandatory=$true)][string]$Instance,
+        [string]$Ids,
+        [string]$Fields,
+        [datetime]$AsOf,
+        [ValidateSet('all','relations','none')]
+        [string]$Expand = "none", # all, relations, none
+        [ValidateSet('throw','omit')]
         [string]$ErrorPolicy = "throw", # throw, omit
-        [string]$apiversion = "1.0"
+        [string]$APIVersion = "1.0",
+        [ValidateNotNull()]
+        [PSCredential]$Credential
     )
 
-    $uri = "$instance/_apis/wit/workitems?api-version=$apiversion"
+    $Uri = "$Instance/_apis/wit/workitems?api-version=$APIVersion"
 
-    if ($ids -ne "") {
-        $uri += "&ids=$ids"
+    if ($Ids -ne "") {
+        $Uri += "&ids=$Ids"
     }
-    if ($fields -ne "") {
-        $uri += "&fields=$fields"
+    if ($Fields -ne "") {
+        $Uri += "&fields=$Fields"
     }
-    if ($asOf -ne $null) {
-        $uri += "&asOf=$asOf"
+    if ($AsOf -ne $null) {
+        $Uri += "&asOf=$AsOf"
     }
-    if ($expand -ne "") {
-        $uri += "&`$expand=$expand"
+    if ($Expand -ne "") {
+        $Uri += "&`$expand=$Expand"
     }
     if ($ErrorPolicy -ne "") {
-        $uri += "&ErrorPolicy=$ErrorPolicy"
+        $Uri += "&ErrorPolicy=$ErrorPolicy"
     }
 
-    Write-Verbose $uri
+    Write-Verbose $Uri
 
-   $params = @{ Method = "Get"; Uri = $uri;  ContentType = 'application/json'}
+   $Params = @{ Credential = $Credential; Method = "Get"; Uri = $Uri; ContentType = 'application/json'}
 
-   return invoke_rest $params
+   return invoke_rest $Params
 }
 
 #############################################################
@@ -84,35 +88,37 @@ function Get-WorkItems {
 #############################################################
 function Get-WorkItem {
     Param (
-        [Parameter(Mandatory=$true)][string]$instance,
-        [Parameter(Mandatory=$true)][string]$id,
-        [string]$expand = "none", # all, relations, none
-        [string]$apiversion = "1.0"
+        [Parameter(Mandatory=$true)][string]$Instance,
+        [Parameter(Mandatory=$true)][string]$Id,
+        [ValidateSet('all','relations','none')]
+        [string]$Expand = "none",
+        [string]$APIVersion = "1.0",
+        [ValidateNotNull()]
+        [PSCredential]$Credential
     )
 
-    $uri = "$instance/_apis/wit/workitems/$($id)?api-version=$apiversion"
+    $Uri = "$Instance/_apis/wit/workitems/$($Id)?api-version=$APIVersion"
 
-    if ($expand -ne "") {
-        $uri += "&`$expand=$expand"
+    if ($Expand -ne "") {
+        $Uri += "&`$expand=$Expand"
     }
 
-    Write-Verbose $uri
+    Write-Verbose $Uri
    
-  #  return Invoke-RestMethod -Method Get -Uri "$uri" -UseDefaultCredentials -ContentType 'application/json' 
+    $Params = @{ Credential = $Credential; Method = "Get"; Uri = $Uri; ContentType = 'application/json'}
 
-  $params = @{ Method = "Get"; Uri = $uri;  ContentType = 'application/json'}
-
-   return invoke_rest $params
+    return invoke_rest $Params
 }
 
 
 function Get-WorkItemDefaultValues {
     Param (
-        [Parameter(Mandatory=$true)][string]$instance,
-        [Parameter(Mandatory=$true)][string]$project,
-        [Parameter(Mandatory=$true)][string]$workItemTypeName, # Task, Product Backlog Item, Bug,
-        [string]$apiversion = "1.0",
-        [PSCredential]$credential
+        [Parameter(Mandatory=$true)][string]$Instance,
+        [Parameter(Mandatory=$true)][string]$Project,
+        [ValidateSet('Task','Product Backlog Item','Bug')]
+        [Parameter(Mandatory=$true)][string]$WorkItemTypeName,
+        [string]$APIVersion = "1.0",
+        [PSCredential]$Credential
     )
     # Documentation
     # https://www.visualstudio.com/en-us/docs/integrate/api/wit/work-items#get-default-values
@@ -122,30 +128,25 @@ function Get-WorkItemDefaultValues {
     # Example:
     # Get-WorkItemDefaultValues -instance $instance -project $project -workItemTypeName "Product Backlog Item"
 
-    $uri = "$instance/$project/_apis/wit/workitems/`$$($workItemTypeName)?api-version=$apiversion"
+    $Uri = "$Instance/$Project/_apis/wit/workitems/`$$($WorkItemTypeName)?api-version=$APIVersion"
 
-    Write-Verbose $uri
+    Write-Verbose $Uri
 
-    # Credential execution
-    if ($credential -ne $null) {
-        return Invoke-RestMethod -Method Get -Uri "$uri" -Credential $credential -ContentType 'application/json'
-    }
+    $Params = @{ Credential = $Credential; Method = "Get"; Uri = $Uri; ContentType = 'application/json'}
 
-   # return Invoke-RestMethod -Method Get -Uri "$uri" -UseDefaultCredentials -ContentType 'application/json'
-   $params = @{ Method = "Get"; Uri = $uri;  ContentType = 'application/json'}
-
-   return invoke_rest $params
+    return invoke_rest $Params
 }
 
 
 function New-WorkItem {
     Param (
-        [Parameter(Mandatory=$true)][string]$instance,
-        [Parameter(Mandatory=$true)][string]$project,
-        [Parameter(Mandatory=$true)][string]$workItemTypeName, # Task, Product Backlog Item, Bug
-        [Parameter(Mandatory=$true)][array]$patchDocument,
-        [string]$apiversion = "1.0",
-        [PSCredential]$credential
+        [Parameter(Mandatory=$true)][string]$Instance,
+        [Parameter(Mandatory=$true)][string]$Project,
+        [ValidateSet('Task','Product Backlog Item','Bug')]
+        [Parameter(Mandatory=$true)][string]$WorkItemTypeName, # Task, Product Backlog Item, Bug
+        [Parameter(Mandatory=$true)][array]$PatchDocument,
+        [string]$APIVersion = "1.0",
+        [Parameter(Mandatory=$true)][PSCredential]$Credential
     )
     # Documentation
     # https://www.visualstudio.com/en-us/docs/integrate/api/wit/work-items#create-a-work-item
@@ -157,31 +158,29 @@ function New-WorkItem {
     #                   [PSCustomObject]@{op="add";path="/fields/System.IterationPath";value="CDW\2017"})
     # New-WorkItem -instance $instance -project $project -workItemTypeName "Product Backlog Item" -patchDocument $patchDocument
 
-    $uri = "$instance/$project/_apis/wit/workitems/`$$($workItemTypeName)?api-version=$apiversion"
+    $Uri = "$Instance/$Project/_apis/wit/workitems/`$$($WorkItemTypeName)?api-version=$APIVersion"
 
-    Write-Verbose $uri
+    Write-Verbose $Uri
 
-    $postData = $patchDocument
+    $PostData = $PatchDocument
 
-    Write-Verbose ($postData | Out-String)
+    Write-Verbose ($PostData | Out-String)
 
-    $json = $postData | ConvertTo-Json
+    $Json = $PostData | ConvertTo-Json
 
     # In PowerShell, an array of length 1 will flatten and the JSON format will not contain the brackets. We need to modify our json string to accomodate this.
-    if ($json.StartsWith("[") -eq $false) {
-        $json = "[" + $json
+    if ($Json.StartsWith("[") -eq $false) {
+        $Json = "[" + $Json
     }
-    if ($json.EndsWith("]") -eq $false) {
-        $json = $json + "]"
+    if ($Json.EndsWith("]") -eq $false) {
+        $Json = $Json + "]"
     }
     
-    Write-Verbose $json
+    Write-Verbose $Json
 
-   # return Invoke-RestMethod -Method Patch -Uri "$uri" -Body $json -UseDefaultCredentials -ContentType 'application/json-patch+json'
+    $Params = @{ Credential = $Credential; Method = "Patch"; Uri = $Uri;  Body = $Json; ContentType = 'application/json-patch+json'}
 
-   $params = @{ Method = "Patch"; Uri = $uri;  Body = $json; ContentType = 'application/json=patch+json'}
-
-   return invoke_rest $params
+    return invoke_rest $Params
 }
 
 #############################################################

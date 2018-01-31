@@ -19,7 +19,7 @@
 # https://github.com/majkinetor/TFS/blob/master/TFS/TFS.psm1
 
 # TODO: Change to $PSScriptRoot when we run it via a moduel
-$path = "C:\dev\CDW\Utilities\PowerShell Scripts\TFS\TFSRestAPI"
+$path = "C:\Users\ANEWHARD\Documents\GitHub\TFSRestAPI\TFSRestAPI"
 
 # Get a list of all the functions avaiable before loading the TFS_Rest_API
 $pre = Get-ChildItem Function:\*

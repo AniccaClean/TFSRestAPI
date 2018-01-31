@@ -47,13 +47,15 @@ function Get-Queries {
 
 function Get-Query {
     Param (
-        [Parameter(Mandatory=$true)][string]$instance,
-        [Parameter(Mandatory=$true)][string]$project,
-        [string]$folderPath,
-        [int]$depth,
-        [string]$expand, # enum { none, all, clauses, wiql }
-        [bool]$includeDeleted,
-        [string]$apiversion = "2.2"
+        [Parameter(Mandatory=$true)][string]$Instance,
+        [Parameter(Mandatory=$true)][string]$Project,
+        [string]$FolderPath,
+        [int]$Depth,
+        [ValidateSet('none','all','clauses', 'wiql')]
+        [string]$Expand,
+        [bool]$IncludeDeleted,
+        [string]$APIVersion = "2.2",
+        [Parameter(Mandatory=$true)][PSCredential]$Credential
     )
     # Documentation
     # https://www.visualstudio.com/en-us/docs/integrate/api/wit/queries#get-a-query-or-folder
@@ -65,27 +67,25 @@ function Get-Query {
     # Example:
     # Get-Query -instance $instance -project $project -folderPath "Shared Queries" -depth 2 -includeDeleted $true 
 
-    $uri = "$instance/$project/_apis/wit/queries?api-version=$apiversion"
+    $Uri = "$Instance/$Project/_apis/wit/queries?api-version=$APIVersion"
 
-    if ($folderPath -ne "") {
-        $uri = "$instance/$project/_apis/wit/queries/$($folderPath)?api-version=$apiversion"
+    if ($FolderPath -ne "") {
+        $Uri = "$Instance/$Project/_apis/wit/queries/$($FolderPath)?api-version=$APIVersion"
     }
-    if ($depth -ne 0) {
-        $uri += "&`$depth=$depth"
+    if ($Depth -ne 0) {
+        $Uri += "&`$depth=$Depth"
     }
-    if ($expand -ne "") {
-        $uri += "&`$expand=$expand"
+    if ($Expand -ne "") {
+        $Uri += "&`$expand=$Expand"
     }
-    if ($includeDeleted -ne $false) {
-        $uri += "&`$includeDeleted=$includeDeleted"
+    if ($IncludeDeleted -ne $false) {
+        $Uri += "&`$includeDeleted=$IncludeDeleted"
     }
 
-    Write-Verbose $uri
+    Write-Verbose $Uri
 
-   # return Invoke-RestMethod -Method Get -Uri "$uri" -UseDefaultCredentials -ContentType 'application/json'
+    $Params = @{ Credential = $Credential; Method = "Get"; Uri = $Uri; ContentType = 'application/json'}
 
-    $params = @{ Method = 'Get'; Uri = "$uri"; ContentType = 'application/json' }
-   
     return invoke_rest $params
 }
 

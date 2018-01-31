@@ -10,15 +10,15 @@
 # .DESCRIPTION
 # Run a TFS Query
 # 
-# .PARAMETER instance
+# .PARAMETER Instance
 # VS Team Services account ({instance}.visualstudio.com) or TFS server ({server:port}).
-# .PARAMETER project
+# .PARAMETER Project
 # Name or ID of the project.
-# .PARAMETER timePrecision
+# .PARAMETER TimePrecision
 # True if time precision is allowed in the date time comparisons.
-# .PARAMETER query
+# .PARAMETER Query
 # The query string to run.
-# .PARAMETER apiversion
+# .PARAMETER APIVersion
 # Version of the TFS REST API version to use
 #
 # .LINK 
@@ -26,11 +26,12 @@
 #############################################################
 function Invoke-Query {
     Param (
-        [Parameter(Mandatory=$true)][string]$instance,
-        [Parameter(Mandatory=$true)][string]$project,
-        [bool]$timePrecision,
-        [Parameter(Mandatory=$true)][string]$query,
-        [string]$apiversion = "1.0"
+        [Parameter(Mandatory=$true)][string]$Instance,
+        [Parameter(Mandatory=$true)][string]$Project,
+        [bool]$TimePrecision,
+        [Parameter(Mandatory=$true)][string]$Query,
+        [string]$APIVersion = "1.0",
+        [Parameter(Mandatory=$true)][PSCredential]$Credential
     )
     # Documentation
     # https://www.visualstudio.com/en-us/docs/integrate/api/wit/wiql#run-a-query
@@ -39,19 +40,19 @@ function Invoke-Query {
     #
     # Example:
 
-    $uri = "$instance/$project/_apis/wit/wiql?api-version=$apiversion"
+    $Uri = "$Instance/$Project/_apis/wit/wiql?api-version=$APIVersion"
 
-    Write-Verbose $uri
+    Write-Verbose $Uri
 
-    $postData = @{ query = $query }
+    $PostData = @{ query = $Query }
 
-    $json = $postData | ConvertTo-Json
+    $Json = $PostData | ConvertTo-Json
 
-    Write-Verbose $json
+    Write-Verbose $Json
 
-    $params = @{ Method = "Post"; Uri = $uri; Body = $json; ContentType = 'application/json'}
+    $Params = @{ Credential = $Credential; Method = "Post"; Uri = $Uri;  Body = $Json; ContentType = 'application/json'}
 
-    return invoke_rest $params
+    return invoke_rest $Params
 }
 
 
